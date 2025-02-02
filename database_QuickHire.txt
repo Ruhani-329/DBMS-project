@@ -1,0 +1,111 @@
+
+CREATE DATABASE IF NOT EXISTS QUICKHIRE;
+
+
+
+-- Table: users
+CREATE TABLE users (
+    user_id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    address VARCHAR(255),
+    contact VARCHAR(100),
+    email VARCHAR(255) UNIQUE NOT NULL,
+    points INT DEFAULT 0 -- Track user's points
+);
+
+CREATE TABLE provider (
+    provider_id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) UNIQUE NOT NULL,
+    location VARCHAR(250),
+    password VARCHAR(255) NOT NULL,
+    experience INT,
+    address VARCHAR(255),
+    contact VARCHAR(100),
+    email VARCHAR(255) UNIQUE NOT NULL,
+    category VARCHAR(255) NOT NULL, 
+    image VARCHAR(255), -- Path or URL to the provider's image
+    
+    subscription_status TINYINT(1) DEFAULT 0, 
+    subscription_expiry DATE 
+);
+-- Table: review
+CREATE TABLE review (
+    review_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    provider_id INT NOT NULL,
+    ratings INT CHECK (ratings BETWEEN 1 AND 5), -- Enforce valid rating range
+    comment VARCHAR(255),
+    CONSTRAINT fk_review_user FOREIGN KEY (user_id) REFERENCES users(user_id),
+    CONSTRAINT fk_review_provider FOREIGN KEY (provider_id) REFERENCES provider(provider_id)
+);
+
+-- Table: saved_posts
+CREATE TABLE saved_posts (
+    user_id INT NOT NULL,
+    provider_id INT NOT NULL,
+    PRIMARY KEY (user_id, provider_id),
+    FOREIGN KEY (user_id) REFERENCES users(user_id),
+    FOREIGN KEY (provider_id) REFERENCES provider(provider_id)
+);
+
+-- Table: booking
+CREATE TABLE booking (
+    booking_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    provider_id INT NOT NULL,
+    date DATE NOT NULL,
+    time VARCHAR(100) NOT NULL,
+    status VARCHAR(255) NOT NULL,
+payment_method VARCHAR(255),
+    message TEXT,
+    CONSTRAINT fk_booking_user FOREIGN KEY (user_id) REFERENCES users(user_id),
+    CONSTRAINT fk_booking_provider FOREIGN KEY (provider_id) REFERENCES provider(provider_id)
+);
+CREATE TABLE messages (
+    message_id INT AUTO_INCREMENT PRIMARY KEY,
+    sender_id INT NOT NULL,
+    receiver_id INT NOT NULL,    
+    message_text TEXT NOT NULL,
+    sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+   );
+-- Create a new table to log subscription payments
+CREATE TABLE subscriptions (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    provider_id INT NOT NULL,
+    payment_method VARCHAR(20) NOT NULL,
+    transaction_id VARCHAR(50) NOT NULL,
+    amount DECIMAL(10, 2) NOT NULL,
+    status ENUM('paid', 'pending') DEFAULT 'pending',
+    subscription_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    expiry_date DATETIME NOT NULL,
+    FOREIGN KEY (provider_id) REFERENCES provider(provider_id) ON DELETE CASCADE
+);
+
+
+-- Table: payment
+CREATE TABLE payment (
+    payment_id INT AUTO_INCREMENT PRIMARY KEY,
+    booking_id INT NOT NULL,
+    payment_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    payment_method varchar(255),
+    CONSTRAINT fk_payment_booking FOREIGN KEY (booking_id) REFERENCES booking(booking_id)
+);
+
+-- Table: admin
+CREATE TABLE admin (
+    username VARCHAR(100) PRIMARY KEY,
+    password VARCHAR(100) NOT NULL
+);
+-- Create a new table to log subscription payments
+CREATE TABLE subscriptions (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    provider_id INT NOT NULL,
+    payment_method VARCHAR(20) NOT NULL,
+    transaction_id VARCHAR(50) NOT NULL,
+    amount DECIMAL(10, 2) NOT NULL,
+    status ENUM('paid', 'pending') DEFAULT 'pending',
+    subscription_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    expiry_date DATETIME NOT NULL,
+    FOREIGN KEY (provider_id) REFERENCES provider(provider_id) ON DELETE CASCADE
+);
